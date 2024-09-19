@@ -5,17 +5,17 @@ import { Server } from "socket.io";
 import connect from "./app/connection/mongoose.js";
 //load env variables
 process.loadEnvFile();
-//initialize express
+
+// Inicializar express
 const app = express();
-//connect to database
+
+// Conectar a la base de datos
 connect();
 
-
 const server = http.createServer(app);
+const io = new Server(server);
 
-const io = new Server(server)
-
-//midelewares
+// Middleware para CORS y compartir io con las rutas
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
@@ -26,31 +26,32 @@ app.use(function (req, res, next) {
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept, Authorization, auth-token"
     );
-    req.io = io;
+    req.io = io; // Agregar socket.io al request
     next();
 });
-//body parser
+
+// Body parser para datos JSON
 app.use(express.json());
 
-//websocket connection
+// Conexión de WebSocket
 io.on("connection", (socket) => {
-    console.log("a user connected");
+    console.log("user connected");
+
     socket.on("disconnect", () => {
         console.log("user disconnected");
     });
 });
 
-//routes
-//auth routes
+// Rutas
 import AuthRoutes from "./app/routes/authRoute.js";
-// import UserRoutes from "./routes/UserRoutes.js";
-// import ClientRoutes from "./routes/ClientRoutes.js";
+import UserRoutes from "./app/routes/userRoute.js";
+import GymEntryRoutes from "./app/routes/gymEntryRoute.js";
+import MembershipRoutes from "./app/routes/memberShipRoute.js";
 
-app.use("/api/v1", AuthRoutes);
+app.use("/api/v1", AuthRoutes, UserRoutes, GymEntryRoutes, MembershipRoutes);
 
-
+// Iniciar el servidor HTTP
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });
-

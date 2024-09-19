@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const gymEntrySchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -7,4 +7,4 @@ const gymEntrySchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const GymEntry = mongoose.model('GymEntry', gymEntrySchema);
-module.exports = GymEntry;
+export default GymEntry;
