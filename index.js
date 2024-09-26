@@ -1,6 +1,7 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import cors from "cors";
 //database connection
 import connect from "./app/connection/mongoose.js";
 //load env variables
@@ -15,17 +16,19 @@ connect();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Middleware para CORS y compartir io con las rutas
+// Configurar opciones de CORS
+const corsOptions = {
+    origin: '*', 
+    credentials: true,
+    methods: "GET,HEAD,OPTIONS,POST,PUT,DELETE",
+    allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization, auth-token"
+};
+
+// Usar el middleware de cors
+app.use(cors(corsOptions));
+
+// Middleware para agregar socket.io al request
 app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-        "Access-Control-Allow-Methods",
-        "GET,HEAD,OPTIONS,POST,PUT,DELETE"
-    );
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept, Authorization, auth-token"
-    );
     req.io = io; // Agregar socket.io al request
     next();
 });
