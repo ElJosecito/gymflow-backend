@@ -33,6 +33,8 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.use('/uploads', express.static('uploads'));
+
 // Body parser para datos JSON
 app.use(express.json());
 

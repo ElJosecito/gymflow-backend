@@ -78,7 +78,7 @@ const imageUpload = async (req, res) => {
 
         const filePath = await saveImage(req.file);
 
-        user.image = filePath;
+        user.image = `/${filePath}`;
         await user.save();
 
         res.status(200).send('File uploaded successfully');
