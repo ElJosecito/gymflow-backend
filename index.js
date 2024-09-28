@@ -14,11 +14,16 @@ const app = express();
 connect();
 
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server,{
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 // Configurar opciones de CORS
 const corsOptions = {
-    origin: '*', 
+    origin: '*',
     credentials: true,
     methods: "GET,HEAD,OPTIONS,POST,PUT,DELETE",
     allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization, auth-token"
@@ -41,6 +46,9 @@ app.use(express.json());
 // Conexión de WebSocket
 io.on("connection", (socket) => {
     console.log("user connected");
+
+    // Aquí emites el evento de gymStatusUpdate u otros
+    socket.emit('gymStatusUpdate');
 
     socket.on("disconnect", () => {
         console.log("user disconnected");
