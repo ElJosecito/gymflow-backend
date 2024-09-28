@@ -1,5 +1,7 @@
 import User from "../models/userModel.js";
 
+import fs from "fs";
+
 // get all users
 
 const getUsers = async (req, res) => {
@@ -70,6 +72,51 @@ const deleteUser = async (req, res) => {
     }
 }
 
-const userController = { getUsers, getUserById, updateMemberShip, updateUser, deleteUser };
+const imageUpload = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        const filePath = await saveImage(req.file);
+
+        user.image = filePath;
+        await user.save();
+
+        res.status(200).send('File uploaded successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal server error");
+    }
+}
+
+const saveImage = async (file) => {
+    const timestamp = Date.now(); // Obtiene la marca de tiempo actual
+    const originalName = file.originalname.split('.'); // Divide el nombre por el punto (extensión)
+    const fileNameWithoutExt = originalName[0]; // Obtiene el nombre sin extensión
+    const fileExt = originalName[1]; // Obtiene la extensión del archivo
+    const newFileName = `${fileNameWithoutExt}_${timestamp}.${fileExt}`; // Crea un nuevo nombre con la fecha
+    const newPath = `uploads/profileImages/${newFileName}`; // Nueva ruta
+
+    // Renombra el archivo a la nueva ruta con el nombre modificado
+    fs.renameSync(file.path, newPath);
+    return newPath;
+}
+
+
+const imageDelete = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        fs.unlinkSync(user.image);
+        user.image = null;
+        await user.save();
+        res.status(200).send('File deleted successfully');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal server error");
+    }
+}
+
+
+
+const userController = { getUsers, getUserById, updateMemberShip, updateUser, deleteUser, imageUpload, imageDelete };
 
 export default userController;
