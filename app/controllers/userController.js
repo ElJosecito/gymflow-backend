@@ -1,4 +1,5 @@
 import User from "../models/userModel.js";
+import gymEntries from "../models/gymEntryModel.js";
 
 import fs from "fs";
 
@@ -34,15 +35,26 @@ const getUserById = async (req, res) => {
 const updateMemberShip = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        const allowedMemberShips = ['basic', 'gold', 'platinum'];
+
+        // Verifica si el valor de memberShip es uno de los permitidos
+        if (!allowedMemberShips.includes(req.body.memberShip)) {
+            return res.status(400).json({ message: "Membresía no válida" });
+        }
+
         user.memberShip = req.body.memberShip;
         await user.save();
         res.json(user);
     } catch (error) {
         console.error(error);
-        res.status(500).send("Internal server error");
+        res.status(500).send("Error interno del servidor");
     }
-}
-
+};
 //update user
 
 const updateUser = async (req, res) => {
@@ -64,8 +76,22 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
-        await User.findByIdAndDelete(req.params.id);
+        const { id } = req.body;
+
+        const user = await User.findById(id);
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        user.gymEntries.forEach(async (entry) => {
+            await gymEntries.findByIdAndDelete(entry);
+        });
+
+        await User.findByIdAndDelete(id);
         res.send("User deleted successfully");
+
+
     } catch (error) {
         console.error(error);
         res.status(500).send("Internal server error");

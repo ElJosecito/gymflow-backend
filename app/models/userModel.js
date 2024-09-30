@@ -23,7 +23,13 @@ const userSchema = new mongoose.Schema({
     image: {
         type: String,
     },
-    memberShip: { type: mongoose.Schema.Types.ObjectId, ref: 'Membership' },
+    //enum
+    memberShip:
+    {
+        type: String,
+        enum: ['basic', 'gold', 'platinum'],
+        default: 'basic',
+    },
     active: {
         type: Boolean,
         default: false,
