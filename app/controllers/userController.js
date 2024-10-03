@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import gymEntries from "../models/gymEntryModel.js";
 
-import fs from "fs";
+import fs from "fs/promises";
 
 // get all users
 
@@ -102,39 +102,47 @@ const imageUpload = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
 
-        const filePath = await saveImage(req.file);
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
 
-        user.image = `/${filePath}`;
+        if (user.image !== "") {
+            console.log("Image already exists");
+            return res.status(400).send("Image already exists");
+        }
+
+        user.image = `http://localhost:3000/${req.file.path}`;
         await user.save();
-
-        res.status(200).send('File uploaded successfully');
+        res.status(200).send("Image uploaded successfully");
     } catch (error) {
         console.error(error);
         res.status(500).send("Internal server error");
     }
-}
-
-const saveImage = async (file) => {
-    const timestamp = Date.now(); // Obtiene la marca de tiempo actual
-    const originalName = file.originalname.split('.'); // Divide el nombre por el punto (extensión)
-    const fileNameWithoutExt = originalName[0]; // Obtiene el nombre sin extensión
-    const fileExt = originalName[1]; // Obtiene la extensión del archivo
-    const newFileName = `${fileNameWithoutExt}_${timestamp}.${fileExt}`; // Crea un nuevo nombre con la fecha
-    const newPath = `uploads/profileImages/${newFileName}`; // Nueva ruta
-
-    // Renombra el archivo a la nueva ruta con el nombre modificado
-    fs.renameSync(file.path, newPath);
-    return newPath;
-}
+};
 
 
 const imageDelete = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
-        fs.unlinkSync(user.image);
-        user.image = null;
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        if (user.image === "") {
+            console.log("No image found");
+            return res.status(404).send("Image not found");
+        }
+
+        const imagePath = user.image.split("3000/")[1];
+
+        await fs.unlink(imagePath);
+
+        user.image = "";
+
         await user.save();
-        res.status(200).send('File deleted successfully');
+        await res.status(200).send("Image deleted successfully");
+
     } catch (error) {
         console.error(error);
         res.status(500).send("Internal server error");
