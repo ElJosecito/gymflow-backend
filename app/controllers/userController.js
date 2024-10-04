@@ -60,10 +60,37 @@ const updateMemberShip = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
-        user.image = req.body.image;
-        user.active = req.body.active;
-        user.gymEntries = req.body.gymEntries;
-        user.isAdmin = req.body.isAdmin;
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        if (req.body.firstName) {
+            user.firstName = req.body.firstName;
+        }
+        if (req.body.lastName) {
+            user.lastName = req.body.lastName;
+        }
+        if (req.body.phoneNumber) {
+            user.phoneNumber = req.body.phoneNumber;
+        }
+        if (req.body.email) {
+            user.email = req.body.email;
+        }
+        if (req.body.password) {
+            user.password = req.body.password;
+        }
+        if (req.body.memberShip) {
+            user.memberShip = req.body.memberShip;
+        }
+        if (req.body.active !== undefined) { // Verificación ajustada
+            user.active = req.body.active;
+        }
+        if (req.body.isAdmin !== undefined) { // Aplicado también para isAdmin
+            user.isAdmin = req.body.isAdmin;
+        }
+
+
         await user.save();
         res.json(user);
     } catch (error) {
@@ -106,14 +133,20 @@ const imageUpload = async (req, res) => {
             return res.status(404).send("User not found");
         }
 
-        if (user.image !== "") {
-            console.log("Image already exists");
-            return res.status(400).send("Image already exists");
+        if (!req.file) {
+            return res.status(400).send("No image uploaded");
+        }
+
+        if (user.image && user.image !== "") {
+            const imagePath = user.image.split("http://localhost:3000/")[1];
+            await fs.unlink(imagePath);
         }
 
         user.image = `http://localhost:3000/${req.file.path}`;
         await user.save();
         res.status(200).send("Image uploaded successfully");
+
+
     } catch (error) {
         console.error(error);
         res.status(500).send("Internal server error");
@@ -129,12 +162,12 @@ const imageDelete = async (req, res) => {
             return res.status(404).send("User not found");
         }
 
-        if (user.image === "") {
-            console.log("No image found");
-            return res.status(404).send("Image not found");
+
+        if (!user.image || user.image === "") {
+            return res.status(400).send("No image to delete");
         }
 
-        const imagePath = user.image.split("3000/")[1];
+        const imagePath = user.image.split("http://localhost:3000/")[1];
 
         await fs.unlink(imagePath);
 
