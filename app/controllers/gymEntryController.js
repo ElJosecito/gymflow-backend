@@ -62,8 +62,12 @@ const createGymEntry = async (req, res) => {
   try {
     // Verificar si el usuario con el QR proporcionado existe
     const user = await User.findOne({ _id: id });
-    if (!user || !user.active) {
-      return res.status(404).json({ message: 'Usuario no encontrado o membresía inactiva' });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    if (!user.active){
+      return res.status(400).json({ message: 'Usuario no activo', user });
     }
 
     // Registrar la entrada en el gym
@@ -84,29 +88,30 @@ const createGymEntry = async (req, res) => {
       currentCapacity: gymCapacity // Enviar la capacidad actualizada
     });
 
-    res.status(200).json({ message: 'Acceso registrado correctamente' });
+    res.status(200).json({ message: 'Acceso registrado correctamente', user:{
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      image: user.image,
+      active: user.active,
+      gymEntries: user.gymEntries,
+      memberShip: user.memberShip,
+      isAdmin: user.isAdmin
+    } });
   } catch (error) {
     res.status(500).json({ error: 'Error al registrar la entrada' });
   }
 };
 
 const leaveGymEntry = async (req, res) => {
-    const { id } = req.body;
   
     try {
-      // Verificar si el usuario con el QR proporcionado existe
-      const user = await User.findOne({ _id: id });
-      if (!user) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
-      }
-  
-      // Decrementar la capacidad del gym
+      
       gymCapacity = Math.max(0, gymCapacity - 1);
   
       // Emitir evento de WebSocket para actualizar la capacidad del gym en tiempo real
       req.io.emit('gymStatusUpdate', {
         message: 'Un usuario ha salido',
-        userId: user._id,
         currentCapacity: gymCapacity
       });
   
@@ -131,6 +136,16 @@ const resetGymEntry = async (req, res) => {
         res.status(500).json({ error: 'Error al resetear el gym' });
     }
 }
+
+// current gym capacity
+const getGymStatus = async (req, res) => {
+  try {
+    // Devolver la capacidad actual del gym
+    res.status(200).json({ currentCapacity: gymCapacity });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener el estado del gym' });
+  }
+};
   
 const gymEntryController = {
     getGymEntries,
@@ -139,7 +154,8 @@ const gymEntryController = {
     deleteGymEntry,
     createGymEntry,
     leaveGymEntry,
-    resetGymEntry
+    resetGymEntry,
+    getGymStatus
 }
 
 export default gymEntryController;
