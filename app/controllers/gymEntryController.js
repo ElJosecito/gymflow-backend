@@ -66,8 +66,8 @@ const createGymEntry = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    if (!user.active){
-      return res.status(400).json({ message: 'Usuario no activo', user });
+    if (user.active !== true ){
+      return res.json({ message: 'Usuario no activo', user });
     }
 
     // Registrar la entrada en el gym
