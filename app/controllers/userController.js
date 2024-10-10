@@ -138,11 +138,11 @@ const imageUpload = async (req, res) => {
         }
 
         if (user.image && user.image !== "") {
-            const imagePath = user.image.split("http://localhost:3000/")[1];
+            const imagePath = user.image.split("http://10.0.0.178:3000/")[1];
             await fs.unlink(imagePath);
         }
 
-        user.image = `http://localhost:3000/${req.file.path}`;
+        user.image = `http://10.0.0.178:3000/${req.file.path}`;
         await user.save();
         res.status(200).send("Image uploaded successfully");
 

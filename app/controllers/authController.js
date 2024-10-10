@@ -1,5 +1,6 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
+import { use } from "bcrypt/promises.js";
 import jwt from "jsonwebtoken";
 
 
@@ -47,7 +48,8 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).send("Invalid credentials");
+      // User does not exist
+      return res.status(400).send({status: 400});
     }
 
     // Check if password is correct
