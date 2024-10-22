@@ -34,6 +34,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    memberShipEnd: {
+        type: Date,
+        default: null,
+    },
     gymEntries: [{ type: mongoose.Schema.Types.ObjectId, ref: 'GymEntry' }],
     isAdmin: {
         type: Boolean,

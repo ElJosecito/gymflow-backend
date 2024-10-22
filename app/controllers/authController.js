@@ -73,8 +73,11 @@ const login = async (req, res) => {
           lastName: user.lastName,
           email: user.email,
           number: user.number,
+          memberShip: user.memberShip,
+          active: user.active,
+          memberShipEnd: user.memberShipEnd,
         },
-      })
+      }).status(200);
 
   } catch (error) {
     console.error(error);

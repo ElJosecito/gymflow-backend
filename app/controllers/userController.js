@@ -42,12 +42,16 @@ const updateMemberShip = async (req, res) => {
 
         const allowedMemberShips = ['basic', 'gold', 'platinum'];
 
+
         // Verifica si el valor de memberShip es uno de los permitidos
         if (!allowedMemberShips.includes(req.body.memberShip)) {
             return res.status(400).json({ message: "Membresía no válida" });
         }
 
+        const currentDate = new Date();
+
         user.memberShip = req.body.memberShip;
+        user.memberShipEnd = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
         await user.save();
         res.json(user);
     } catch (error) {
@@ -167,7 +171,7 @@ const imageDelete = async (req, res) => {
             return res.status(400).send("No image to delete");
         }
 
-        const imagePath = user.image.split("http://localhost:3000/")[1];
+        const imagePath = user.image.split("http://10.0.0.178:3000/")[1];
 
         await fs.unlink(imagePath);
 
