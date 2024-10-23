@@ -48,10 +48,10 @@ const updateMemberShip = async (req, res) => {
             return res.status(400).json({ message: "Membresía no válida" });
         }
 
-        const currentDate = new Date();
 
         user.memberShip = req.body.memberShip;
-        user.memberShipEnd = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+        user.memberShipEnd = new Date(new Date().setMonth(new Date().getMonth() + 1))
+
         await user.save();
         res.json(user);
     } catch (error) {
@@ -92,6 +92,10 @@ const updateUser = async (req, res) => {
         }
         if (req.body.isAdmin !== undefined) { // Aplicado también para isAdmin
             user.isAdmin = req.body.isAdmin;
+        }
+
+        if (req.body.memberShipEnd) {
+            user.memberShipEnd = req.body.memberShipEnd;
         }
 
 

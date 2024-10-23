@@ -1,6 +1,5 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
-import { use } from "bcrypt/promises.js";
 import jwt from "jsonwebtoken";
 
 
@@ -14,7 +13,7 @@ const register = async (req, res) => {
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return res.status(400).send("User already exists");
+      return res.status(400).send({status: 400});
     }
 
     // Hash password
